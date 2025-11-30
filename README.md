@@ -37,7 +37,7 @@ Polaris is an advanced AI assistant visualized as a floating, interactive blue s
 
 5.  Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## 🚀 How to Deploy on Vercel
+## 🚀 How to Deploy on Vercel (Step-by-Step)
 
 Follow these steps to deploy Polaris 0.0 to the web for free using Vercel.
 
@@ -53,14 +53,14 @@ Push your code to a Git provider (GitHub, GitLab, or Bitbucket).
 Vercel should automatically detect that this is a **Vite** project.
 
 1.  **Framework Preset**: Ensure it is set to `Vite`.
-2.  **Root Directory**: Leave as `./`.
+2.  **Root Directory**: Leave as `./` (default).
 3.  **Build Command**: `npm run build` (default).
 4.  **Output Directory**: `dist` (default).
 
 ### Step 4: Environment Variables (CRITICAL)
 **The app will not work without the API Key.**
 
-1.  Expand the **"Environment Variables"** section.
+1.  Expand the **"Environment Variables"** section in the deployment screen.
 2.  Add a new variable:
     *   **Key**: `API_KEY`
     *   **Value**: Paste your Google Gemini API Key (starting with `AIza...`).
@@ -75,9 +75,15 @@ Vercel should automatically detect that this is a **Vite** project.
 
 ## Troubleshooting Vercel Deployments
 
-- **White Screen on Load**:
-  - Ensure you added the `API_KEY` in the Environment Variables settings.
-  - Redeploy (go to Deployments -> Redeploy) if you added the key *after* the initial build failed.
+- **App says "Unable to connect to processing core"**:
+  - This means your API Key is missing or invalid.
+  - Go to your Vercel Project Settings -> Environment Variables.
+  - Ensure `API_KEY` is set correctly.
+  - **Important**: After changing variables, you must go to the **Deployments** tab and **Redeploy** the latest commit for changes to take effect.
 
-- **Process is not defined**:
-  - This project includes a polyfill in `index.html` and configuration in `vite.config.ts` to handle this. Ensure `vite.config.ts` is present in the root.
+- **White Screen on Load**:
+  - If you see a blank screen, ensure you have removed any `importmap` scripts from `index.html` (this codebase handles that for you).
+  - Check the browser console (F12) for errors.
+
+- **"process is not defined" error**:
+  - This project includes a polyfill in `index.html` to handle this automatically.

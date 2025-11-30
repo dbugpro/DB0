@@ -15,7 +15,12 @@ let ai: GoogleGenAI | null = null;
 
 const getAiClient = (): GoogleGenAI => {
   if (!ai) {
-    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.API_KEY;
+    // Check if key is missing, empty, or literally the string "undefined" due to some build tools
+    if (!apiKey || apiKey === 'undefined' || apiKey.includes("API_KEY")) {
+      throw new Error("Valid API Key not found in environment");
+    }
+    ai = new GoogleGenAI({ apiKey });
   }
   return ai;
 };
@@ -30,18 +35,21 @@ export const initializeChat = (): void => {
       },
     });
   } catch (error) {
-    console.error("Failed to initialize chat session:", error);
+    // We catch the error here so the app doesn't crash on load (White Screen of Death).
+    // The user will see an error message in the chat when they try to send a message.
+    console.warn("Polaris initialization paused:", error);
   }
 };
 
 export const sendMessageStream = async function* (message: string): AsyncGenerator<string, void, unknown> {
+  // Try to initialize if not already done (e.g. if it failed on mount)
   if (!chatSession) {
     initializeChat();
   }
 
+  // Double check if initialization succeeded
   if (!chatSession) {
-    // If it still fails, it likely means the API key is missing or invalid.
-    yield "I am unable to connect to my processing core. Please verify your API credentials.";
+    yield "I am unable to connect to my processing core. Please verify your API Key in the deployment settings.";
     return;
   }
 
@@ -56,6 +64,6 @@ export const sendMessageStream = async function* (message: string): AsyncGenerat
     }
   } catch (error) {
     console.error("Error sending message to Gemini:", error);
-    yield "I encountered a disturbance in my processing core. Please try again.";
+    yield "I encountered a disturbance in my processing core. Please try again later.";
   }
 };
