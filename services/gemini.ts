@@ -2,7 +2,6 @@ import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
 
 // Initialize the Gemini AI client
 // Note: process.env.API_KEY is expected to be available in the environment
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 // System instruction to give the AI a persona
 const SYSTEM_INSTRUCTION = `You are Polaris, an advanced AI assistant visualized as a floating blue sphere. 
@@ -12,14 +11,27 @@ You can use markdown.
 When asked about your appearance, describe yourself as a perfect, glowing blue sphere of pure intelligence.`;
 
 let chatSession: Chat | null = null;
+let ai: GoogleGenAI | null = null;
+
+const getAiClient = (): GoogleGenAI => {
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return ai;
+};
 
 export const initializeChat = (): void => {
-  chatSession = ai.chats.create({
-    model: 'gemini-2.5-flash',
-    config: {
-      systemInstruction: SYSTEM_INSTRUCTION,
-    },
-  });
+  try {
+    const client = getAiClient();
+    chatSession = client.chats.create({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+      },
+    });
+  } catch (error) {
+    console.error("Failed to initialize chat session:", error);
+  }
 };
 
 export const sendMessageStream = async function* (message: string): AsyncGenerator<string, void, unknown> {
@@ -28,7 +40,9 @@ export const sendMessageStream = async function* (message: string): AsyncGenerat
   }
 
   if (!chatSession) {
-    throw new Error("Failed to initialize chat session.");
+    // If it still fails, it likely means the API key is missing or invalid.
+    yield "I am unable to connect to my processing core. Please verify your API credentials.";
+    return;
   }
 
   try {
