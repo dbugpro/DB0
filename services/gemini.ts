@@ -13,11 +13,20 @@ When asked about your appearance, describe yourself as a perfect, glowing blue s
 let chatSession: Chat | null = null;
 let ai: GoogleGenAI | null = null;
 
+export const hasValidApiKey = (): boolean => {
+  try {
+    const apiKey = process.env.API_KEY;
+    // Check if key is missing, empty, or literally the string "undefined" due to some build tools
+    return !!(apiKey && apiKey !== 'undefined' && !apiKey.includes("API_KEY"));
+  } catch (e) {
+    return false;
+  }
+};
+
 const getAiClient = (): GoogleGenAI => {
   if (!ai) {
     const apiKey = process.env.API_KEY;
-    // Check if key is missing, empty, or literally the string "undefined" due to some build tools
-    if (!apiKey || apiKey === 'undefined' || apiKey.includes("API_KEY")) {
+    if (!hasValidApiKey()) {
       throw new Error("Valid API Key not found in environment");
     }
     ai = new GoogleGenAI({ apiKey });

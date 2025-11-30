@@ -3,7 +3,7 @@ import { Send, Sparkles } from 'lucide-react';
 import Orb from './components/Orb';
 import ChatMessage from './components/ChatMessage';
 import { Message, Sender, OrbState } from './types';
-import { sendMessageStream, initializeChat } from './services/gemini';
+import { sendMessageStream, initializeChat, hasValidApiKey } from './services/gemini';
 
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -16,10 +16,14 @@ const App: React.FC = () => {
   // Initialize chat on mount
   useEffect(() => {
     initializeChat();
+    const isReady = hasValidApiKey();
+    
     // Welcome message
     const welcomeMsg: Message = {
       id: 'welcome',
-      text: "Systems online. I am Polaris. How may I assist you today?",
+      text: isReady 
+        ? "Systems online. I am Polaris. How may I assist you today?"
+        : "Systems online, but API connection is missing. Please configure your API_KEY in the environment variables to proceed.",
       sender: Sender.Bot,
       timestamp: new Date(),
     };
